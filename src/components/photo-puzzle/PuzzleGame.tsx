@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-import { Shuffle, Trophy } from "lucide-react";
+import { Shuffle, Trophy, Eye, Lightbulb, Undo } from "lucide-react";
 import confetti from "canvas-confetti";
 import { useIsMobileDevice } from "@/hooks/use-mobile";
+import { usePuzzleRecords } from "@/hooks/use-puzzle-records";
+import { PreviewModal } from "./PreviewModal";
 import MobilePuzzleGame from "./MobilePuzzleGame";
 
 type Difficulty = "easy" | "medium" | "hard";
@@ -39,6 +41,8 @@ const getGridSize = (difficulty: Difficulty) => {
 
 export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
   const isMobileDevice = useIsMobileDevice();
+  const [showPreview, setShowPreview] = useState(false);
+  const { stats, saveRecord } = usePuzzleRecords();
 
   // If mobile device, use the mobile-optimized component
   if (isMobileDevice) {
@@ -49,6 +53,8 @@ export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
   const [selectedPiece, setSelectedPiece] = useState<number | null>(null);
   const [moves, setMoves] = useState(0);
   const [solved, setSolved] = useState(false);
+  const [correctPiecesCount, setCorrectPiecesCount] = useState(0);
+  const [moveHistory, setMoveHistory] = useState<Array<{ piece1Index: number; piece2Index: number }>>([]);
   const gridSize = getGridSize(difficulty);
   const pieceCount = getPieceCount(difficulty);
 
@@ -73,9 +79,13 @@ export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
       [newPieces[i].currentIndex, newPieces[j].currentIndex] = [newPieces[j].currentIndex, newPieces[i].currentIndex];
     }
     
+    const correctCount = newPieces.filter(p => p.currentIndex === p.correctIndex).length;
+    
     setPieces(newPieces);
     setMoves(0);
     setSolved(false);
+    setCorrectPiecesCount(correctCount);
+    setMoveHistory([]);
   };
 
   const handlePieceClick = (index: number) => {
@@ -99,12 +109,20 @@ export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
         setPieces(newPieces);
         setMoves(moves + 1);
         setSelectedPiece(null);
+        setMoveHistory([...moveHistory, { piece1Index: selectedPiece, piece2Index: index }]);
 
         // Check if solved
         const isSolved = newPieces.every(p => p.currentIndex === p.correctIndex);
+        const correctCount = newPieces.filter(p => p.currentIndex === p.correctIndex).length;
+        setCorrectPiecesCount(correctCount);
+        
         if (isSolved) {
           setSolved(true);
-          toast.success(`Puzzle solved in ${moves + 1} moves!`);
+          saveRecord(difficulty, moves + 1, Date.now());
+          const bestRecord = stats.bestRecords[difficulty as keyof typeof stats.bestRecords];
+          const isNewRecord = !bestRecord || moves + 1 < bestRecord.moves;
+          
+          toast.success(`Puzzle solved in ${moves + 1} moves!` + (isNewRecord ? " 🎉 New Record!" : ""));
           confetti({
             particleCount: 100,
             spread: 70,
@@ -128,22 +146,63 @@ export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
     };
   };
 
+  const undoMove = () => {
+    if (moveHistory.length === 0) return;
+    
+    const lastMove = moveHistory[moveHistory.length - 1];
+    const newPieces = [...pieces];
+    
+    const piece1 = newPieces.find(p => p.currentIndex === lastMove.piece2Index);
+    const piece2 = newPieces.find(p => p.currentIndex === lastMove.piece1Index);
+    
+    if (piece1 && piece2) {
+      [piece1.currentIndex, piece2.currentIndex] = [piece2.currentIndex, piece1.currentIndex];
+      setPieces(newPieces);
+      setMoves(Math.max(0, moves - 1));
+      setMoveHistory(moveHistory.slice(0, -1));
+      const correctCount = newPieces.filter(p => p.currentIndex === p.correctIndex).length;
+      setCorrectPiecesCount(correctCount);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Puzzle Game</h2>
-          <p className="text-muted-foreground">Moves: {moves}</p>
+          <div className="flex items-center gap-4 text-muted-foreground">
+            <p>Moves: {moves}</p>
+            <p>Correct: {correctPiecesCount}/{pieceCount}</p>
+          </div>
         </div>
-        <Button
-          onClick={initializePuzzle}
-          variant="secondary"
-          size="sm"
-        >
-          <Shuffle className="mr-2 h-4 w-4" />
-          Restart
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setShowPreview(true)}
+            variant="outline"
+            size="sm"
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            Preview
+          </Button>
+          <Button
+            onClick={undoMove}
+            variant="outline"
+            size="sm"
+            disabled={moveHistory.length === 0 || solved}
+          >
+            <Undo className="mr-2 h-4 w-4" />
+            Undo
+          </Button>
+          <Button
+            onClick={initializePuzzle}
+            variant="secondary"
+            size="sm"
+          >
+            <Shuffle className="mr-2 h-4 w-4" />
+            Restart
+          </Button>
+        </div>
       </div>
 
       {/* Puzzle Grid */}
@@ -163,6 +222,8 @@ export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
               className={`aspect-square cursor-pointer transition-all hover:scale-105 rounded ${
                 selectedPiece === piece.currentIndex
                   ? "ring-4 ring-primary shadow-lg shadow-primary/50"
+                  : piece.currentIndex === piece.correctIndex
+                  ? "ring-2 ring-success/50"
                   : "hover:ring-2 hover:ring-accent"
               }`}
               style={getPieceStyle(piece)}
@@ -178,6 +239,8 @@ export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
           </div>
         </div>
       )}
+
+      <PreviewModal image={image} isOpen={showPreview} onClose={() => setShowPreview(false)} />
     </div>
   );
 };

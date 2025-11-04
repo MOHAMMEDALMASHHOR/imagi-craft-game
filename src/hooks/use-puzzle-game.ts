@@ -15,6 +15,9 @@ export interface PuzzleGameState {
   startTime: number | null;
   elapsedTime: number;
   isPaused: boolean;
+  correctPiecesCount: number;
+  showingHint: boolean;
+  moveHistory: Array<{ piece1Index: number; piece2Index: number }>;
 }
 
 export interface UsePuzzleGameOptions {
@@ -48,6 +51,9 @@ export const usePuzzleGame = ({
     startTime: null,
     elapsedTime: 0,
     isPaused: false,
+    correctPiecesCount: 0,
+    showingHint: false,
+    moveHistory: [],
   });
 
   const [dragState, setDragState] = useState<{
@@ -142,6 +148,8 @@ export const usePuzzleGame = ({
       [newPieces[0].currentIndex, newPieces[1].currentIndex] = [newPieces[1].currentIndex, newPieces[0].currentIndex];
     }
 
+    const correctCount = newPieces.filter(p => p.currentIndex === p.correctIndex).length;
+    
     setGameState({
       pieces: newPieces,
       selectedPiece: null,
@@ -150,6 +158,9 @@ export const usePuzzleGame = ({
       startTime: Date.now(),
       elapsedTime: 0,
       isPaused: false,
+      correctPiecesCount: correctCount,
+      showingHint: false,
+      moveHistory: [],
     });
 
     // Clear saved state
@@ -182,6 +193,7 @@ export const usePuzzleGame = ({
           [piece1.currentIndex, piece2.currentIndex] = [piece2.currentIndex, piece1.currentIndex];
 
           const isSolved = newPieces.every(p => p.currentIndex === p.correctIndex);
+          const correctCount = newPieces.filter(p => p.currentIndex === p.correctIndex).length;
 
           if (isSolved && onSolved) {
             onSolved(prev.moves + 1, Date.now() - (prev.startTime || Date.now()));
@@ -193,6 +205,8 @@ export const usePuzzleGame = ({
             moves: prev.moves + 1,
             selectedPiece: null,
             solved: isSolved,
+            correctPiecesCount: correctCount,
+            moveHistory: [...prev.moveHistory, { piece1Index: prev.selectedPiece!, piece2Index: index }],
           };
         }
       }
@@ -242,6 +256,7 @@ export const usePuzzleGame = ({
         [sourcePiece.currentIndex, targetPiece.currentIndex] = [targetPiece.currentIndex, sourcePiece.currentIndex];
 
         const isSolved = newPieces.every(p => p.currentIndex === p.correctIndex);
+        const correctCount = newPieces.filter(p => p.currentIndex === p.correctIndex).length;
 
         if (isSolved && onSolved) {
           onSolved(prev.moves + 1, Date.now() - (prev.startTime || Date.now()));
@@ -253,6 +268,8 @@ export const usePuzzleGame = ({
           moves: prev.moves + 1,
           selectedPiece: null,
           solved: isSolved,
+          correctPiecesCount: correctCount,
+          moveHistory: [...prev.moveHistory, { piece1Index: sourcePiece.currentIndex, piece2Index: targetIndex }],
         };
       }
       return prev;
@@ -283,6 +300,43 @@ export const usePuzzleGame = ({
     }
   }, [autoSave, saveKey]);
 
+  const showHint = useCallback(() => {
+    if (gameState.solved) return;
+    
+    setGameState(prev => ({ ...prev, showingHint: true }));
+    
+    setTimeout(() => {
+      setGameState(prev => ({ ...prev, showingHint: false }));
+    }, 2000);
+  }, [gameState.solved]);
+
+  const undoMove = useCallback(() => {
+    setGameState(prev => {
+      if (prev.moveHistory.length === 0) return prev;
+      
+      const lastMove = prev.moveHistory[prev.moveHistory.length - 1];
+      const newPieces = [...prev.pieces];
+      
+      const piece1 = newPieces.find(p => p.currentIndex === lastMove.piece2Index);
+      const piece2 = newPieces.find(p => p.currentIndex === lastMove.piece1Index);
+      
+      if (piece1 && piece2) {
+        [piece1.currentIndex, piece2.currentIndex] = [piece2.currentIndex, piece1.currentIndex];
+        const correctCount = newPieces.filter(p => p.currentIndex === p.correctIndex).length;
+        
+        return {
+          ...prev,
+          pieces: newPieces,
+          moves: Math.max(0, prev.moves - 1),
+          moveHistory: prev.moveHistory.slice(0, -1),
+          correctPiecesCount: correctCount,
+        };
+      }
+      
+      return prev;
+    });
+  }, []);
+
   return {
     gameState,
     dragState,
@@ -296,5 +350,7 @@ export const usePuzzleGame = ({
     resumeGame,
     resetGame,
     clearSavedState,
+    showHint,
+    undoMove,
   };
 };

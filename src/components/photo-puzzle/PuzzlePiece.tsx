@@ -147,7 +147,8 @@ export function PuzzlePiece({
         "min-h-[48px] min-w-[48px]",
         {
           "ring-4 ring-primary shadow-lg shadow-primary/50 scale-105 z-10": isSelected,
-          "ring-2 ring-accent shadow-md scale-102 hover:ring-accent/70": !isSelected && !isDragging,
+          "ring-2 ring-success shadow-success/50": correctIndex === currentIndex && !isSelected,
+          "ring-2 ring-accent shadow-md scale-102 hover:ring-accent/70": !isSelected && !isDragging && correctIndex !== currentIndex,
           "opacity-50 scale-95": isDragging,
           "ring-4 ring-success animate-pulse": canDrop,
           "active:scale-95": isPressed,

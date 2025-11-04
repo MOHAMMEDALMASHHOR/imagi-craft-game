@@ -1,9 +1,12 @@
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-import { Shuffle, Trophy, Pause, Play, RotateCcw } from "lucide-react";
+import { useState } from "react";
+import { Shuffle, Trophy, Pause, Play, RotateCcw, Eye, Lightbulb, Undo } from "lucide-react";
 import confetti from "canvas-confetti";
 import { useIsMobile, useOrientation } from "@/hooks/use-mobile";
 import { usePuzzleGame } from "@/hooks/use-puzzle-game";
+import { usePuzzleRecords } from "@/hooks/use-puzzle-records";
+import { PreviewModal } from "./PreviewModal";
 import PuzzlePiece from "./PuzzlePiece";
 
 type Difficulty = "easy" | "medium" | "hard";
@@ -59,6 +62,8 @@ export const MobilePuzzleGame = ({ image, difficulty, onBack }: MobilePuzzleGame
   const orientation = useOrientation() || 'portrait';
   const pieceCount = getMobilePieceCount(difficulty, orientation);
   const gridSize = getMobileGridSize(difficulty, orientation);
+  const [showPreview, setShowPreview] = useState(false);
+  const { stats, saveRecord } = usePuzzleRecords();
 
   const {
     gameState,
@@ -72,11 +77,20 @@ export const MobilePuzzleGame = ({ image, difficulty, onBack }: MobilePuzzleGame
     pauseGame,
     resumeGame,
     resetGame,
+    showHint,
+    undoMove,
   } = usePuzzleGame({
     pieceCount,
     image,
     onSolved: (moves, time) => {
-      toast.success(`Puzzle solved in ${moves} moves and ${formatTime(time)}!`);
+      saveRecord(difficulty, moves, time);
+      const bestRecord = stats.bestRecords[difficulty as keyof typeof stats.bestRecords];
+      const isNewRecord = !bestRecord || moves < bestRecord.moves;
+      
+      toast.success(
+        `Puzzle solved in ${moves} moves and ${formatTime(time)}!` +
+        (isNewRecord ? " 🎉 New Record!" : "")
+      );
       confetti({
         particleCount: 100,
         spread: 70,
@@ -126,7 +140,33 @@ export const MobilePuzzleGame = ({ image, difficulty, onBack }: MobilePuzzleGame
             </Button>
             <h1 className="text-lg font-bold text-foreground">Puzzle</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Button
+              onClick={() => setShowPreview(true)}
+              variant="outline"
+              size="sm"
+              className="min-h-[44px] min-w-[44px]"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={showHint}
+              variant="outline"
+              size="sm"
+              className="min-h-[44px] min-w-[44px]"
+              disabled={gameState.solved || gameState.showingHint}
+            >
+              <Lightbulb className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={undoMove}
+              variant="outline"
+              size="sm"
+              className="min-h-[44px] min-w-[44px]"
+              disabled={gameState.moveHistory.length === 0 || gameState.solved}
+            >
+              <Undo className="h-4 w-4" />
+            </Button>
             <Button
               onClick={togglePause}
               variant="outline"
@@ -157,9 +197,14 @@ export const MobilePuzzleGame = ({ image, difficulty, onBack }: MobilePuzzleGame
               Time: <span className="font-bold text-foreground">{formatTime(gameState.elapsedTime)}</span>
             </span>
           </div>
-          <span className="text-muted-foreground">
-            {gridSize.rows}×{gridSize.cols}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">
+              {gameState.correctPiecesCount}/{pieceCount}
+            </span>
+            <span className="text-muted-foreground">
+              {gridSize.rows}×{gridSize.cols}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -255,6 +300,9 @@ export const MobilePuzzleGame = ({ image, difficulty, onBack }: MobilePuzzleGame
           </div>
         </div>
       )}
+
+      {/* Preview Modal */}
+      <PreviewModal image={image} isOpen={showPreview} onClose={() => setShowPreview(false)} />
     </div>
   );
 };

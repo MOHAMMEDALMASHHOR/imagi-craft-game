@@ -1,10 +1,11 @@
 import { useState, useRef } from "react";
-import { Camera, Upload } from "lucide-react";
+import { Camera, Upload, BarChart3 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { toast } from "sonner";
 import { DifficultySelector } from "./DifficultySelector";
 import { PuzzleGame } from "./PuzzleGame";
+import { StatsModal } from "./StatsModal";
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -16,6 +17,7 @@ export const SinglePlayerMode = ({ onBack }: SinglePlayerModeProps) => {
   const [image, setImage] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [gameStarted, setGameStarted] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,9 +52,19 @@ export const SinglePlayerMode = ({ onBack }: SinglePlayerModeProps) => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="text-center mb-8 animate-fade-in">
-        <h2 className="text-3xl font-bold mb-2 text-foreground">Single Player Mode</h2>
-        <p className="text-muted-foreground">Capture or upload a photo to begin</p>
+      <div className="flex justify-between items-center mb-8 animate-fade-in">
+        <div className="text-center flex-1">
+          <h2 className="text-3xl font-bold mb-2 text-foreground">Single Player Mode</h2>
+          <p className="text-muted-foreground">Capture or upload a photo to begin</p>
+        </div>
+        <Button
+          onClick={() => setShowStats(true)}
+          variant="outline"
+          size="icon"
+          className="min-h-[44px] min-w-[44px]"
+        >
+          <BarChart3 className="h-5 w-5" />
+        </Button>
       </div>
 
       <div className="space-y-6">
@@ -114,6 +126,8 @@ export const SinglePlayerMode = ({ onBack }: SinglePlayerModeProps) => {
           Start Puzzle
         </Button>
       </div>
+
+      <StatsModal isOpen={showStats} onClose={() => setShowStats(false)} />
     </div>
   );
 };
