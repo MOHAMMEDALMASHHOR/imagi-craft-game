@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { DifficultySelector } from "./DifficultySelector";
 import { SplitScreenGame } from "./SplitScreenGame";
 
-type Difficulty = "easy" | "medium" | "hard";
+type Difficulty = "easy" | "medium" | "hard" | "expert";
 
 interface PlayerData {
   image: string | null;

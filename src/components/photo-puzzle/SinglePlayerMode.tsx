@@ -7,7 +7,7 @@ import { DifficultySelector } from "./DifficultySelector";
 import { PuzzleGame } from "./PuzzleGame";
 import { StatsModal } from "./StatsModal";
 
-type Difficulty = "easy" | "medium" | "hard";
+type Difficulty = "easy" | "medium" | "hard" | "expert";
 
 interface SinglePlayerModeProps {
   onBack: () => void;

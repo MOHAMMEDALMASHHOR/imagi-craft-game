@@ -8,7 +8,7 @@ import { usePuzzleRecords } from "@/hooks/use-puzzle-records";
 import { PreviewModal } from "./PreviewModal";
 import MobilePuzzleGame from "./MobilePuzzleGame";
 
-type Difficulty = "easy" | "medium" | "hard";
+type Difficulty = "easy" | "medium" | "hard" | "expert";
 
 interface Piece {
   id: number;
@@ -28,6 +28,7 @@ const getPieceCount = (difficulty: Difficulty) => {
     case "easy": return 8;
     case "medium": return 16;
     case "hard": return 32;
+    case "expert": return 48;
   }
 };
 
@@ -36,6 +37,7 @@ const getGridSize = (difficulty: Difficulty) => {
     case "easy": return { rows: 2, cols: 4 };
     case "medium": return { rows: 4, cols: 4 };
     case "hard": return { rows: 4, cols: 8 };
+    case "expert": return { rows: 6, cols: 8 };
   }
 };
 

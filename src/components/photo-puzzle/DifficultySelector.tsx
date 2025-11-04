@@ -1,6 +1,6 @@
 import { Card } from "../ui/card";
 
-type Difficulty = "easy" | "medium" | "hard";
+type Difficulty = "easy" | "medium" | "hard" | "expert";
 
 interface DifficultySelectorProps {
   difficulty: Difficulty;
@@ -11,6 +11,7 @@ const difficulties = [
   { value: "easy" as Difficulty, label: "Easy", pieces: "8 pieces", color: "from-success to-success/70" },
   { value: "medium" as Difficulty, label: "Medium", pieces: "16 pieces", color: "from-primary to-primary-glow" },
   { value: "hard" as Difficulty, label: "Hard", pieces: "32 pieces", color: "from-accent to-accent-glow" },
+  { value: "expert" as Difficulty, label: "Expert", pieces: "48 pieces", color: "from-purple-600 to-purple-400" },
 ];
 
 export const DifficultySelector = ({ difficulty, onDifficultyChange }: DifficultySelectorProps) => {
@@ -19,7 +20,7 @@ export const DifficultySelector = ({ difficulty, onDifficultyChange }: Difficult
       <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
         Difficulty
       </h3>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {difficulties.map((diff) => (
           <Card
             key={diff.value}

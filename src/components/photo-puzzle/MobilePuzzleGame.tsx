@@ -9,7 +9,7 @@ import { usePuzzleRecords } from "@/hooks/use-puzzle-records";
 import { PreviewModal } from "./PreviewModal";
 import PuzzlePiece from "./PuzzlePiece";
 
-type Difficulty = "easy" | "medium" | "hard";
+type Difficulty = "easy" | "medium" | "hard" | "expert";
 
 interface MobilePuzzleGameProps {
   image: string;
@@ -24,12 +24,14 @@ const getMobilePieceCount = (difficulty: Difficulty, orientation: 'portrait' | '
       case "easy": return 12; // 4x3 grid
       case "medium": return 24; // 6x4 grid
       case "hard": return 48; // 8x6 grid
+      case "expert": return 72; // 9x8 grid
     }
   } else {
     switch (difficulty) {
       case "easy": return 12; // 4x3 grid
       case "medium": return 20; // 5x4 grid
       case "hard": return 35; // 7x5 grid
+      case "expert": return 56; // 8x7 grid
     }
   }
 };
@@ -40,12 +42,14 @@ const getMobileGridSize = (difficulty: Difficulty, orientation: 'portrait' | 'la
       case "easy": return { rows: 3, cols: 4 };
       case "medium": return { rows: 4, cols: 6 };
       case "hard": return { rows: 6, cols: 8 };
+      case "expert": return { rows: 9, cols: 8 };
     }
   } else {
     switch (difficulty) {
       case "easy": return { rows: 3, cols: 4 };
       case "medium": return { rows: 4, cols: 5 };
       case "hard": return { rows: 5, cols: 7 };
+      case "expert": return { rows: 8, cols: 7 };
     }
   }
 };

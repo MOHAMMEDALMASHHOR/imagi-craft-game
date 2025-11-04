@@ -15,6 +15,7 @@ export interface PuzzleStats {
     easy?: PuzzleRecord;
     medium?: PuzzleRecord;
     hard?: PuzzleRecord;
+    expert?: PuzzleRecord;
   };
 }
 
