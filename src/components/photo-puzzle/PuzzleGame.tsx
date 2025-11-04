@@ -38,6 +38,13 @@ const getGridSize = (difficulty: Difficulty) => {
 };
 
 export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
+  const isMobileDevice = useIsMobileDevice();
+
+  // If mobile device, use the mobile-optimized component
+  if (isMobileDevice) {
+    return <MobilePuzzleGame image={image} difficulty={difficulty} onBack={onBack} />;
+  }
+
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [selectedPiece, setSelectedPiece] = useState<number | null>(null);
   const [moves, setMoves] = useState(0);
