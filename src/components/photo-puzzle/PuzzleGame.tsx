@@ -3,6 +3,8 @@ import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { Shuffle, Trophy } from "lucide-react";
 import confetti from "canvas-confetti";
+import { useIsMobileDevice } from "@/hooks/use-mobile";
+import MobilePuzzleGame from "./MobilePuzzleGame";
 
 type Difficulty = "easy" | "medium" | "hard";
 
