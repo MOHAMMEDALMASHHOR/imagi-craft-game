@@ -1,6 +1,7 @@
 import { Camera, Grid3x3, Square, Zap, Hash, Search, Lightbulb } from "lucide-react";
 import { GameType } from "@/pages/Index";
 import { Card } from "./ui/card";
+import { useIsMobile, useIsTouchDevice } from "@/hooks/use-mobile";
 
 interface GameGridProps {
   onGameSelect: (game: GameType) => void;
