@@ -3,6 +3,8 @@ import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { Shuffle, Trophy } from "lucide-react";
 import confetti from "canvas-confetti";
+import { useIsMobileDevice } from "@/hooks/use-mobile";
+import MobilePuzzleGame from "./MobilePuzzleGame";
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -36,6 +38,13 @@ const getGridSize = (difficulty: Difficulty) => {
 };
 
 export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
+  const isMobileDevice = useIsMobileDevice();
+
+  // If mobile device, use the mobile-optimized component
+  if (isMobileDevice) {
+    return <MobilePuzzleGame image={image} difficulty={difficulty} onBack={onBack} />;
+  }
+
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [selectedPiece, setSelectedPiece] = useState<number | null>(null);
   const [moves, setMoves] = useState(0);
