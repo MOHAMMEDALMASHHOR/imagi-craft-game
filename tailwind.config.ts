@@ -71,6 +71,28 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      spacing: {
+        '17': '4.25rem', // For bottom navigation height
+        '44': '11rem',   // Minimum touch target size
+        '48': '12rem',   // Larger touch target for important elements
+      },
+      minHeight: {
+        '44': '11rem',   // Minimum touch target height
+        '48': '12rem',   // Larger touch target height
+      },
+      minWidth: {
+        '44': '11rem',   // Minimum touch target width
+        '48': '12rem',   // Larger touch target width
+      },
+      height: {
+        '17': '4.25rem', // Bottom navigation height
+        '44': '11rem',   // Touch target height
+        '48': '12rem',   // Large touch target height
+      },
+      width: {
+        '44': '11rem',   // Touch target width
+        '48': '12rem',   // Large touch target width
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
