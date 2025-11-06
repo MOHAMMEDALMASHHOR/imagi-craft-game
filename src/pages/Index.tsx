@@ -9,6 +9,8 @@ import { WordSearch } from "@/components/games/WordSearch";
 import { SimonSays } from "@/components/games/SimonSays";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { UserProfile } from "@/components/UserProfile";
+import { SoundToggle } from "@/components/SoundToggle";
 
 export type GameType = 
   | "home"
@@ -49,6 +51,11 @@ const Index = () => {
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-accent/20 animate-gradient" />
       
+      {/* User profile in top right */}
+      <div className="absolute top-4 right-4 z-50 animate-fade-in">
+        <UserProfile />
+      </div>
+
       {/* Back button */}
       {currentGame !== "home" && (
         <div className="absolute top-4 left-4 z-50 animate-fade-in">
@@ -62,6 +69,9 @@ const Index = () => {
           </Button>
         </div>
       )}
+
+      {/* Sound toggle */}
+      <SoundToggle />
 
       {/* Game content */}
       <div className="relative z-10">

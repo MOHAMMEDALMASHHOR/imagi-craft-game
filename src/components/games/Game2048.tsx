@@ -2,7 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-import { RotateCcw, Trophy } from "lucide-react";
+import { RotateCcw, Trophy, Share2 } from "lucide-react";
+import { soundManager } from "@/lib/sounds";
+import { useGameScore } from "@/hooks/use-game-score";
+import { ShareButton } from "@/components/ShareButton";
 
 type Grid = (number | null)[][];
 
@@ -14,6 +17,7 @@ export const Game2048 = () => {
   const [bestScore, setBestScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
+  const { user, saveScore } = useGameScore();
 
   useEffect(() => {
     const saved = localStorage.getItem('2048BestScore');
@@ -138,6 +142,13 @@ export const Game2048 = () => {
     const newScore = score + scoreGained;
     setScore(newScore);
 
+    if (moved) {
+      soundManager.move();
+      if (scoreGained > 0) {
+        soundManager.place(); // Sound for successful merge
+      }
+    }
+
     if (newScore > bestScore) {
       setBestScore(newScore);
       localStorage.setItem('2048BestScore', newScore.toString());
@@ -146,13 +157,17 @@ export const Game2048 = () => {
     // Check for 2048 tile
     if (!won && finalGrid.some(row => row.some(cell => cell === 2048))) {
       setWon(true);
+      soundManager.win();
       toast.success('You won! 🎉 Keep playing to increase your score!');
+      saveScore({ gameType: '2048', score: newScore });
     }
 
     // Check for game over
     if (isGameOver(finalGrid)) {
       setGameOver(true);
+      soundManager.lose();
       toast.error(`Game Over! Final Score: ${newScore}`);
+      saveScore({ gameType: '2048', score: newScore });
     }
   }, [grid, score, bestScore, won]);
 
@@ -252,6 +267,12 @@ export const Game2048 = () => {
             <RotateCcw className="w-4 h-4" />
             New Game
           </Button>
+          {(gameOver || won) && (
+            <ShareButton
+              title="2048 Game"
+              text={`I scored ${score} points in 2048! ${won ? '🎉 I reached 2048!' : ''} Can you beat my score?`}
+            />
+          )}
         </div>
 
         {/* Mobile Controls */}

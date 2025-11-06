@@ -7,6 +7,10 @@ import { useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import BottomNavigation from "@/components/ui/bottom-navigation";
 import Index from "./pages/Index";
+import Auth from "./pages/Auth";
+import DailyChallenges from "./pages/DailyChallenges";
+import Profile from "./pages/Profile";
+import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +62,10 @@ const AppContent = () => {
       <div className={`${isMobile ? 'pb-17' : ''}`}>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/daily-challenges" element={<DailyChallenges />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

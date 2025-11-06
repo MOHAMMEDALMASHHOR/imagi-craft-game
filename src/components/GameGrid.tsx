@@ -3,6 +3,7 @@ import { GameType } from "@/pages/Index";
 import { Card } from "./ui/card";
 import { useIsMobile, useIsTouchDevice } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { soundManager } from "@/lib/sounds";
 
 interface GameGridProps {
   onGameSelect: (game: GameType) => void;
@@ -66,6 +67,7 @@ export const GameGrid = ({ onGameSelect }: GameGridProps) => {
   const isTouchDevice = useIsTouchDevice();
 
   const handleGameSelect = (game: GameType) => {
+    soundManager.click();
     if ('vibrate' in navigator && isTouchDevice) {
       navigator.vibrate(50);
     }
