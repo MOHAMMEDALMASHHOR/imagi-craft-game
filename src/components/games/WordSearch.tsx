@@ -3,6 +3,10 @@ import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { Timer, Lightbulb, RotateCcw } from "lucide-react";
+import confetti from "canvas-confetti";
+import { soundManager } from "@/lib/sounds";
+import { useGameScore } from "@/hooks/use-game-score";
+import { ShareButton } from "@/components/ShareButton";
 
 type Cell = {
   letter: string;
@@ -106,6 +110,7 @@ const generateWordSearch = (words: string[], size: number) => {
 };
 
 export const WordSearch = () => {
+  const { user, saveScore } = useGameScore();
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
   const [grid, setGrid] = useState<Cell[][]>([]);
   const [words, setWords] = useState<string[]>([]);
@@ -114,6 +119,7 @@ export const WordSearch = () => {
   const [selectedCells, setSelectedCells] = useState<[number, number][]>([]);
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
     startNewGame();
@@ -138,6 +144,7 @@ export const WordSearch = () => {
     setSelectedCells([]);
     setTimer(0);
     setIsRunning(true);
+    setCompleted(false);
   };
 
   const handleMouseDown = (row: number, col: number) => {
@@ -166,22 +173,34 @@ export const WordSearch = () => {
     const reverseWord = word.split('').reverse().join('');
 
     if (words.includes(word) && !foundWords.has(word)) {
+      soundManager.success();
       setFoundWords(prev => new Set([...prev, word]));
       markWordAsFound(word);
       toast.success(`Found: ${word}`);
       
       if (foundWords.size + 1 === words.length) {
         setIsRunning(false);
-        toast.success(`All words found in ${formatTime(timer)}!`);
+        setCompleted(true);
+        const score = Math.max(3000 - timer * 10, 500);
+        saveScore({ gameType: 'word-search', score });
+        soundManager.win();
+        toast.success(`All words found in ${formatTime(timer)}! Score: ${score}`);
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       }
     } else if (words.includes(reverseWord) && !foundWords.has(reverseWord)) {
+      soundManager.success();
       setFoundWords(prev => new Set([...prev, reverseWord]));
       markWordAsFound(reverseWord);
       toast.success(`Found: ${reverseWord}`);
       
       if (foundWords.size + 1 === words.length) {
         setIsRunning(false);
-        toast.success(`All words found in ${formatTime(timer)}!`);
+        setCompleted(true);
+        const score = Math.max(3000 - timer * 10, 500);
+        saveScore({ gameType: 'word-search', score });
+        soundManager.win();
+        toast.success(`All words found in ${formatTime(timer)}! Score: ${score}`);
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       }
     }
 
@@ -212,6 +231,7 @@ export const WordSearch = () => {
   const handleHint = () => {
     const unFoundWords = words.filter(w => !foundWords.has(w));
     if (unFoundWords.length > 0) {
+      soundManager.powerUp();
       toast.info(`Look for: ${unFoundWords[0]}`);
     }
   };
@@ -322,8 +342,8 @@ export const WordSearch = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2 justify-center flex-wrap">
-          <Button onClick={handleHint} variant="outline">
+        <div className="flex gap-2 justify-center flex-wrap mb-6">
+          <Button onClick={handleHint} variant="outline" disabled={completed}>
             <Lightbulb className="w-4 h-4 mr-2" />
             Hint
           </Button>
@@ -332,6 +352,15 @@ export const WordSearch = () => {
             New Game
           </Button>
         </div>
+
+        {completed && (
+          <div className="text-center animate-bounce-in">
+            <ShareButton
+              title="Word Search"
+              text={`I found all words in ${formatTime(timer)} (${difficulty} mode)! Can you beat my time?`}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

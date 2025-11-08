@@ -7,6 +7,7 @@ import { useIsMobileDevice } from "@/hooks/use-mobile";
 import { usePuzzleRecords } from "@/hooks/use-puzzle-records";
 import { PreviewModal } from "./PreviewModal";
 import MobilePuzzleGame from "./MobilePuzzleGame";
+import { soundManager } from "@/lib/sounds";
 
 type Difficulty = "easy" | "medium" | "hard" | "expert";
 
@@ -94,6 +95,7 @@ export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
     if (solved) return;
 
     if (selectedPiece === null) {
+      soundManager.click();
       setSelectedPiece(index);
     } else {
       if (selectedPiece === index) {
@@ -102,6 +104,7 @@ export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
       }
 
       // Swap pieces
+      soundManager.move();
       const newPieces = [...pieces];
       const piece1 = newPieces.find(p => p.currentIndex === selectedPiece);
       const piece2 = newPieces.find(p => p.currentIndex === index);
@@ -124,12 +127,15 @@ export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
           const bestRecord = stats.bestRecords[difficulty as keyof typeof stats.bestRecords];
           const isNewRecord = !bestRecord || moves + 1 < bestRecord.moves;
           
+          soundManager.win();
           toast.success(`Puzzle solved in ${moves + 1} moves!` + (isNewRecord ? " 🎉 New Record!" : ""));
           confetti({
             particleCount: 100,
             spread: 70,
             origin: { y: 0.6 }
           });
+        } else if (correctCount > correctPiecesCount) {
+          soundManager.place();
         }
       }
     }

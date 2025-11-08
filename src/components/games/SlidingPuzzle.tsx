@@ -1,15 +1,21 @@
 import { useState, useEffect } from "react";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
-import { Shuffle } from "lucide-react";
+import { Shuffle, Trophy } from "lucide-react";
 import { toast } from "sonner";
+import confetti from "canvas-confetti";
+import { soundManager } from "@/lib/sounds";
+import { useGameScore } from "@/hooks/use-game-score";
+import { ShareButton } from "@/components/ShareButton";
 
 const GRID_SIZE = 4;
 const EMPTY_TILE = GRID_SIZE * GRID_SIZE - 1;
 
 export const SlidingPuzzle = () => {
+  const { user, saveScore } = useGameScore();
   const [tiles, setTiles] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
+  const [solved, setSolved] = useState(false);
 
   useEffect(() => {
     initializeGame();
@@ -28,6 +34,7 @@ export const SlidingPuzzle = () => {
     
     setTiles(newTiles);
     setMoves(0);
+    setSolved(false);
   };
 
   const getNeighbors = (index: number) => {
@@ -48,13 +55,19 @@ export const SlidingPuzzle = () => {
     const neighbors = getNeighbors(emptyIndex);
     
     if (neighbors.includes(index)) {
+      soundManager.move();
       const newTiles = [...tiles];
       [newTiles[emptyIndex], newTiles[index]] = [newTiles[index], newTiles[emptyIndex]];
       setTiles(newTiles);
       setMoves(moves + 1);
       
       if (newTiles.every((tile, idx) => tile === idx)) {
-        toast.success(`Solved in ${moves + 1} moves!`);
+        setSolved(true);
+        const score = Math.max(2000 - moves * 20, 100);
+        saveScore({ gameType: 'sliding-puzzle', score });
+        soundManager.win();
+        toast.success(`Solved in ${moves + 1} moves! Score: ${score}`);
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       }
     }
   };
@@ -74,7 +87,7 @@ export const SlidingPuzzle = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2 max-w-md mx-auto">
+      <div className="grid grid-cols-4 gap-2 max-w-md mx-auto mb-6">
         {tiles.map((tile, idx) => (
           <Card
             key={idx}
@@ -89,6 +102,19 @@ export const SlidingPuzzle = () => {
           </Card>
         ))}
       </div>
+
+      {solved && (
+        <div className="text-center animate-bounce-in space-y-4">
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-success to-success/70 rounded-full text-white font-bold text-lg shadow-lg">
+            <Trophy className="h-6 w-6" />
+            Puzzle Complete!
+          </div>
+          <ShareButton
+            title="Sliding Puzzle"
+            text={`I solved the Sliding Puzzle in ${moves} moves! Can you beat that?`}
+          />
+        </div>
+      )}
     </div>
   );
 };

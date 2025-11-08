@@ -1,8 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-import { Play, RotateCcw, Volume2, VolumeX } from "lucide-react";
+import { Play, RotateCcw, Trophy } from "lucide-react";
+import confetti from "canvas-confetti";
+import { soundManager } from "@/lib/sounds";
+import { useGameScore } from "@/hooks/use-game-score";
+import { ShareButton } from "@/components/ShareButton";
 
 type Color = 'red' | 'blue' | 'green' | 'yellow';
 
@@ -23,6 +27,7 @@ const GLOW_CLASSES = {
 };
 
 export const SimonSays = () => {
+  const { user, saveScore } = useGameScore();
   const [sequence, setSequence] = useState<Color[]>([]);
   const [playerSequence, setPlayerSequence] = useState<Color[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -31,52 +36,17 @@ export const SimonSays = () => {
   const [highScore, setHighScore] = useState(0);
   const [activeColor, setActiveColor] = useState<Color | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const [gameOver, setGameOver] = useState(false);
 
   useEffect(() => {
-    // Initialize Web Audio API
-    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-    
     // Load high score
     const saved = localStorage.getItem('simonHighScore');
     if (saved) setHighScore(parseInt(saved));
-
-    return () => {
-      audioContextRef.current?.close();
-    };
   }, []);
-
-  const playTone = (color: Color) => {
-    if (!soundEnabled || !audioContextRef.current) return;
-
-    const frequencies = {
-      red: 329.63,    // E4
-      blue: 261.63,   // C4
-      green: 392.00,  // G4
-      yellow: 440.00  // A4
-    };
-
-    const ctx = audioContextRef.current;
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
-
-    oscillator.frequency.value = frequencies[color];
-    oscillator.type = 'sine';
-
-    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.3);
-  };
 
   const flashColor = async (color: Color, duration = 500) => {
     setActiveColor(color);
-    playTone(color);
+    soundManager.place();
     await new Promise(resolve => setTimeout(resolve, duration));
     setActiveColor(null);
     await new Promise(resolve => setTimeout(resolve, 200));
@@ -104,6 +74,7 @@ export const SimonSays = () => {
     setPlayerSequence([]);
     setScore(0);
     setGameStarted(true);
+    setGameOver(false);
     
     playSequence(newSequence);
   };
@@ -112,6 +83,7 @@ export const SimonSays = () => {
     const newColor = COLORS[Math.floor(Math.random() * COLORS.length)];
     const newSequence = [...sequence, newColor];
     
+    soundManager.powerUp();
     setSequence(newSequence);
     setPlayerSequence([]);
     setScore(prev => prev + 1);
@@ -132,8 +104,11 @@ export const SimonSays = () => {
     
     if (newPlayerSequence[currentIndex] !== sequence[currentIndex]) {
       // Wrong move - game over
+      soundManager.lose();
       setIsPlayerTurn(false);
       setGameStarted(false);
+      setGameOver(true);
+      saveScore({ gameType: 'simon-says', score });
       
       if (score > highScore) {
         setHighScore(score);
@@ -156,6 +131,7 @@ export const SimonSays = () => {
 
     // Check if player completed the sequence
     if (newPlayerSequence.length === sequence.length) {
+      soundManager.success();
       setIsPlayerTurn(false);
       toast.success('Correct! Next level...');
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -224,7 +200,7 @@ export const SimonSays = () => {
         </Card>
 
         {/* Control Buttons */}
-        <div className="flex gap-3 justify-center flex-wrap">
+        <div className="flex gap-3 justify-center flex-wrap mb-6">
           {!gameStarted ? (
             <Button onClick={startGame} size="lg" className="gap-2">
               <Play className="w-5 h-5" />
@@ -241,26 +217,16 @@ export const SimonSays = () => {
               Restart
             </Button>
           )}
-          
-          <Button
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            variant="outline"
-            size="lg"
-            className="gap-2"
-          >
-            {soundEnabled ? (
-              <>
-                <Volume2 className="w-5 h-5" />
-                Sound On
-              </>
-            ) : (
-              <>
-                <VolumeX className="w-5 h-5" />
-                Sound Off
-              </>
-            )}
-          </Button>
         </div>
+
+        {gameOver && (
+          <div className="text-center animate-bounce-in">
+            <ShareButton
+              title="Simon Says"
+              text={`I reached level ${score} in Simon Says! Can you beat my score?`}
+            />
+          </div>
+        )}
 
         {/* Instructions */}
         <Card className="mt-6 p-4 bg-card/30 backdrop-blur-sm text-left">

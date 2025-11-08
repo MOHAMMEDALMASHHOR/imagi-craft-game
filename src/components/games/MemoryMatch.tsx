@@ -4,6 +4,9 @@ import { Button } from "../ui/button";
 import { Shuffle, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
+import { soundManager } from "@/lib/sounds";
+import { useGameScore } from "@/hooks/use-game-score";
+import { ShareButton } from "@/components/ShareButton";
 
 const emojis = ["🎮", "🎯", "🎨", "🎭", "🎪", "🎸", "🎺", "🎻"];
 
@@ -15,6 +18,7 @@ interface CardType {
 }
 
 export const MemoryMatch = () => {
+  const { user, saveScore } = useGameScore();
   const [cards, setCards] = useState<CardType[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
@@ -28,6 +32,7 @@ export const MemoryMatch = () => {
     if (flippedCards.length === 2) {
       const [first, second] = flippedCards;
       if (cards[first].emoji === cards[second].emoji) {
+        soundManager.success();
         setTimeout(() => {
           setCards(prev => prev.map((card, idx) =>
             idx === first || idx === second ? { ...card, matched: true } : card
@@ -39,11 +44,15 @@ export const MemoryMatch = () => {
           );
           if (allMatched) {
             setSolved(true);
-            toast.success("You won!");
+            const score = Math.max(1000 - moves * 10, 100);
+            saveScore({ gameType: 'memory-match', score });
+            soundManager.win();
+            toast.success(`You won! Score: ${score}`);
             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
           }
         }, 1000);
       } else {
+        soundManager.error();
         setTimeout(() => {
           setCards(prev => prev.map((card, idx) =>
             idx === first || idx === second ? { ...card, flipped: false } : card
@@ -68,6 +77,7 @@ export const MemoryMatch = () => {
   const handleCardClick = (index: number) => {
     if (flippedCards.length === 2 || cards[index].flipped || cards[index].matched) return;
     
+    soundManager.click();
     setCards(prev => prev.map((card, idx) =>
       idx === index ? { ...card, flipped: true } : card
     ));
@@ -107,11 +117,15 @@ export const MemoryMatch = () => {
       </div>
 
       {solved && (
-        <div className="text-center mt-8 animate-bounce-in">
+        <div className="text-center mt-8 animate-bounce-in space-y-4">
           <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-success to-success/70 rounded-full text-white font-bold text-lg shadow-lg">
             <Trophy className="h-6 w-6" />
             Complete!
           </div>
+          <ShareButton
+            title="Memory Match"
+            text={`I completed Memory Match in ${moves} moves! Can you beat my score?`}
+          />
         </div>
       )}
     </div>

@@ -3,6 +3,10 @@ import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { Timer, Lightbulb, RotateCcw, CheckCircle2 } from "lucide-react";
+import confetti from "canvas-confetti";
+import { soundManager } from "@/lib/sounds";
+import { useGameScore } from "@/hooks/use-game-score";
+import { ShareButton } from "@/components/ShareButton";
 
 type Grid = (number | null)[][];
 
@@ -72,6 +76,7 @@ const generateSudoku = (difficulty: 'easy' | 'medium' | 'hard'): { puzzle: Grid;
 };
 
 export const Sudoku = () => {
+  const { user, saveScore } = useGameScore();
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [grid, setGrid] = useState<Grid>([]);
   const [solution, setSolution] = useState<Grid>([]);
@@ -80,6 +85,7 @@ export const Sudoku = () => {
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [mistakes, setMistakes] = useState(0);
+  const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
     startNewGame();
@@ -102,10 +108,12 @@ export const Sudoku = () => {
     setTimer(0);
     setIsRunning(true);
     setMistakes(0);
+    setCompleted(false);
   };
 
   const handleCellClick = (row: number, col: number) => {
     if (initialGrid[row][col] === null) {
+      soundManager.click();
       setSelectedCell([row, col]);
     }
   };
@@ -120,10 +128,19 @@ export const Sudoku = () => {
 
     if (num !== solution[row][col]) {
       setMistakes(prev => prev + 1);
+      soundManager.error();
       toast.error("Incorrect number!");
-    } else if (checkWin(newGrid)) {
-      setIsRunning(false);
-      toast.success(`Puzzle solved in ${formatTime(timer)}!`);
+    } else {
+      soundManager.place();
+      if (checkWin(newGrid)) {
+        setIsRunning(false);
+        setCompleted(true);
+        const score = Math.max(5000 - timer * 5 - mistakes * 50, 500);
+        saveScore({ gameType: 'sudoku', score });
+        soundManager.win();
+        toast.success(`Puzzle solved in ${formatTime(timer)}! Score: ${score}`);
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      }
     }
   };
 
@@ -132,6 +149,7 @@ export const Sudoku = () => {
       toast.error("Select a cell first!");
       return;
     }
+    soundManager.powerUp();
     const [row, col] = selectedCell;
     const newGrid = grid.map(r => [...r]);
     newGrid[row][col] = solution[row][col];
@@ -247,8 +265,8 @@ export const Sudoku = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2 justify-center flex-wrap">
-          <Button onClick={handleHint} variant="outline" disabled={!selectedCell}>
+        <div className="flex gap-2 justify-center flex-wrap mb-6">
+          <Button onClick={handleHint} variant="outline" disabled={!selectedCell || completed}>
             <Lightbulb className="w-4 h-4 mr-2" />
             Hint
           </Button>
@@ -267,11 +285,21 @@ export const Sudoku = () => {
               }
             }}
             variant="default"
+            disabled={completed}
           >
             <CheckCircle2 className="w-4 h-4 mr-2" />
             Check
           </Button>
         </div>
+
+        {completed && (
+          <div className="text-center animate-bounce-in">
+            <ShareButton
+              title="Sudoku"
+              text={`I completed Sudoku (${difficulty}) in ${formatTime(timer)} with ${mistakes} mistakes! Can you beat that?`}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
