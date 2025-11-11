@@ -1,4 +1,4 @@
-import { Camera, Grid3x3, Square, Zap, Hash, Search, Lightbulb, Sparkles, Trophy } from "lucide-react";
+import { Camera, Grid3x3, Square, Zap, Hash, Search, Lightbulb, Sparkles, Trophy, Bomb } from "lucide-react";
 import { GameType } from "@/pages/Index";
 import { Card } from "./ui/card";
 import { useIsMobile, useIsTouchDevice } from "@/hooks/use-mobile";
@@ -74,6 +74,15 @@ const games = [
     iconBg: "bg-gradient-to-br from-primary/20 to-accent/20",
     borderGlow: "hover:shadow-[0_0_30px_rgba(147,51,234,0.5)]",
   },
+  {
+    id: "minesweeper" as GameType,
+    title: "Minesweeper",
+    description: "Clear the minefield",
+    icon: Bomb,
+    gradient: "from-destructive via-primary to-accent",
+    iconBg: "bg-gradient-to-br from-destructive/20 to-primary/20",
+    borderGlow: "hover:shadow-[0_0_30px_rgba(239,68,68,0.5)]",
+  },
 ];
 
 export const GameGrid = ({ onGameSelect }: GameGridProps) => {
@@ -109,7 +118,7 @@ export const GameGrid = ({ onGameSelect }: GameGridProps) => {
 
         <div className="flex flex-wrap justify-center gap-4 pt-4">
           <div className="px-6 py-3 rounded-xl bg-card/50 backdrop-blur-sm border border-border/50">
-            <div className="text-2xl font-bold text-primary">7</div>
+            <div className="text-2xl font-bold text-primary">8</div>
             <div className="text-xs text-muted-foreground">Games</div>
           </div>
           <div className="px-6 py-3 rounded-xl bg-card/50 backdrop-blur-sm border border-border/50">
