@@ -193,6 +193,15 @@ All colors MUST be HSL.
     }
   }
 
+  @keyframes rotate-y {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(180deg);
+    }
+  }
+
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }

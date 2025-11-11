@@ -23,7 +23,45 @@ export const Game2048 = () => {
     const saved = localStorage.getItem('2048BestScore');
     if (saved) setBestScore(parseInt(saved));
     initializeGame();
-  }, []);
+
+    // Touch controls for mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+    
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (gameOver) return;
+      
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+      const minSwipeDistance = 50;
+      
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (Math.abs(deltaX) > minSwipeDistance) {
+          handleMove(deltaX > 0 ? 'right' : 'left');
+        }
+      } else {
+        if (Math.abs(deltaY) > minSwipeDistance) {
+          handleMove(deltaY > 0 ? 'down' : 'up');
+        }
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [gameOver]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -195,21 +233,21 @@ export const Game2048 = () => {
     if (!value) return 'bg-muted/30';
     
     const colors: { [key: number]: string } = {
-      2: 'bg-slate-200 dark:bg-slate-700 text-foreground',
-      4: 'bg-slate-300 dark:bg-slate-600 text-foreground',
-      8: 'bg-orange-400 text-white',
-      16: 'bg-orange-500 text-white',
-      32: 'bg-orange-600 text-white',
-      64: 'bg-red-500 text-white',
-      128: 'bg-yellow-400 text-white',
-      256: 'bg-yellow-500 text-white',
-      512: 'bg-yellow-600 text-white',
-      1024: 'bg-green-500 text-white',
-      2048: 'bg-green-600 text-white',
-      4096: 'bg-purple-500 text-white',
+      2: 'bg-muted text-foreground',
+      4: 'bg-muted/80 text-foreground',
+      8: 'bg-accent/60 text-accent-foreground',
+      16: 'bg-accent/70 text-accent-foreground',
+      32: 'bg-accent/80 text-accent-foreground',
+      64: 'bg-accent text-accent-foreground',
+      128: 'bg-primary/60 text-primary-foreground',
+      256: 'bg-primary/70 text-primary-foreground',
+      512: 'bg-primary/80 text-primary-foreground',
+      1024: 'bg-success/80 text-success-foreground',
+      2048: 'bg-success text-success-foreground animate-glow-pulse',
+      4096: 'bg-primary text-primary-foreground animate-glow-pulse',
     };
 
-    return colors[value] || 'bg-primary text-white';
+    return colors[value] || 'bg-primary text-primary-foreground';
   };
 
   return (

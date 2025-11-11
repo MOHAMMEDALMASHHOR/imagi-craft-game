@@ -105,13 +105,23 @@ export const MemoryMatch = () => {
           <Card
             key={card.id}
             onClick={() => handleCardClick(idx)}
-            className={`aspect-square cursor-pointer transition-all hover:scale-105 flex items-center justify-center text-4xl ${
-              card.flipped || card.matched
-                ? "bg-gradient-to-br from-primary to-primary-glow"
-                : "bg-card/50 backdrop-blur-sm"
-            }`}
+            className={`
+              aspect-square cursor-pointer flex items-center justify-center text-4xl
+              transition-all duration-500 transform-gpu
+              ${card.flipped || card.matched
+                ? "bg-gradient-to-br from-primary to-primary-glow rotate-y-180 scale-105"
+                : "bg-card/50 backdrop-blur-sm hover:scale-105"
+              }
+              ${card.matched ? "opacity-60" : ""}
+            `}
+            style={{
+              transformStyle: 'preserve-3d',
+              perspective: '1000px',
+            }}
           >
-            {(card.flipped || card.matched) && card.emoji}
+            <div className={`transition-opacity duration-300 ${card.flipped || card.matched ? 'opacity-100' : 'opacity-0'}`}>
+              {card.emoji}
+            </div>
           </Card>
         ))}
       </div>

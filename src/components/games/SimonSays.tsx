@@ -13,17 +13,17 @@ type Color = 'red' | 'blue' | 'green' | 'yellow';
 const COLORS: Color[] = ['red', 'blue', 'green', 'yellow'];
 
 const COLOR_CLASSES = {
-  red: 'bg-red-500 hover:bg-red-400 active:bg-red-300',
-  blue: 'bg-blue-500 hover:bg-blue-400 active:bg-blue-300',
-  green: 'bg-green-500 hover:bg-green-400 active:bg-green-300',
-  yellow: 'bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-300',
+  red: 'bg-destructive hover:bg-destructive/80 active:bg-destructive/60',
+  blue: 'bg-primary hover:bg-primary/80 active:bg-primary/60',
+  green: 'bg-success hover:bg-success/80 active:bg-success/60',
+  yellow: 'bg-accent hover:bg-accent/80 active:bg-accent/60',
 };
 
 const GLOW_CLASSES = {
-  red: 'ring-4 ring-red-300 brightness-150',
-  blue: 'ring-4 ring-blue-300 brightness-150',
-  green: 'ring-4 ring-green-300 brightness-150',
-  yellow: 'ring-4 ring-yellow-300 brightness-150',
+  red: 'ring-4 ring-destructive/50 brightness-150 shadow-[0_0_40px_hsl(var(--destructive)/0.8)]',
+  blue: 'ring-4 ring-primary/50 brightness-150 shadow-[0_0_40px_hsl(var(--primary)/0.8)]',
+  green: 'ring-4 ring-success/50 brightness-150 shadow-[0_0_40px_hsl(var(--success)/0.8)]',
+  yellow: 'ring-4 ring-accent/50 brightness-150 shadow-[0_0_40px_hsl(var(--accent)/0.8)]',
 };
 
 export const SimonSays = () => {

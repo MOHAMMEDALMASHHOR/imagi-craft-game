@@ -84,6 +84,7 @@ export const Sudoku = () => {
   const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [mistakes, setMistakes] = useState(0);
   const [completed, setCompleted] = useState(false);
 
@@ -93,11 +94,11 @@ export const Sudoku = () => {
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isRunning) {
+    if (isRunning && !isPaused) {
       interval = setInterval(() => setTimer(prev => prev + 1), 1000);
     }
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, isPaused]);
 
   const startNewGame = () => {
     const { puzzle, solution: sol } = generateSudoku(difficulty);
@@ -112,6 +113,7 @@ export const Sudoku = () => {
   };
 
   const handleCellClick = (row: number, col: number) => {
+    if (isPaused) return;
     if (initialGrid[row][col] === null) {
       soundManager.click();
       setSelectedCell([row, col]);
@@ -119,7 +121,7 @@ export const Sudoku = () => {
   };
 
   const handleNumberInput = (num: number) => {
-    if (!selectedCell) return;
+    if (!selectedCell || isPaused) return;
     
     const [row, col] = selectedCell;
     const newGrid = grid.map(r => [...r]);
@@ -266,7 +268,14 @@ export const Sudoku = () => {
 
         {/* Action Buttons */}
         <div className="flex gap-2 justify-center flex-wrap mb-6">
-          <Button onClick={handleHint} variant="outline" disabled={!selectedCell || completed}>
+          <Button 
+            onClick={() => setIsPaused(!isPaused)} 
+            variant="outline" 
+            disabled={completed}
+          >
+            {isPaused ? 'Resume' : 'Pause'}
+          </Button>
+          <Button onClick={handleHint} variant="outline" disabled={!selectedCell || completed || isPaused}>
             <Lightbulb className="w-4 h-4 mr-2" />
             Hint
           </Button>
@@ -285,7 +294,7 @@ export const Sudoku = () => {
               }
             }}
             variant="default"
-            disabled={completed}
+            disabled={completed || isPaused}
           >
             <CheckCircle2 className="w-4 h-4 mr-2" />
             Check

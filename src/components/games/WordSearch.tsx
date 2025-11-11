@@ -119,6 +119,7 @@ export const WordSearch = () => {
   const [selectedCells, setSelectedCells] = useState<[number, number][]>([]);
   const [timer, setTimer] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
@@ -127,11 +128,11 @@ export const WordSearch = () => {
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isRunning) {
+    if (isRunning && !isPaused) {
       interval = setInterval(() => setTimer(prev => prev + 1), 1000);
     }
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, isPaused]);
 
   const startNewGame = () => {
     const wordList = WORD_LISTS[difficulty];
@@ -148,6 +149,7 @@ export const WordSearch = () => {
   };
 
   const handleMouseDown = (row: number, col: number) => {
+    if (isPaused) return;
     setSelecting(true);
     setSelectedCells([[row, col]]);
   };
@@ -225,7 +227,9 @@ export const WordSearch = () => {
   };
 
   const getCellWord = (row: number, col: number): string => {
-    return '';
+    const cell = grid[row][col];
+    if (!cell.isPartOfWord || cell.wordIndex === -1) return '';
+    return words[cell.wordIndex] || '';
   };
 
   const handleHint = () => {
@@ -343,7 +347,14 @@ export const WordSearch = () => {
 
         {/* Action Buttons */}
         <div className="flex gap-2 justify-center flex-wrap mb-6">
-          <Button onClick={handleHint} variant="outline" disabled={completed}>
+          <Button 
+            onClick={() => setIsPaused(!isPaused)} 
+            variant="outline" 
+            disabled={completed}
+          >
+            {isPaused ? 'Resume' : 'Pause'}
+          </Button>
+          <Button onClick={handleHint} variant="outline" disabled={completed || isPaused}>
             <Lightbulb className="w-4 h-4 mr-2" />
             Hint
           </Button>
