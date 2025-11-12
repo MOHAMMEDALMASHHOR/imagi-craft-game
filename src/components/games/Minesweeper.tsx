@@ -305,9 +305,9 @@ export const Minesweeper = () => {
         )}
 
         {/* Game Grid */}
-        <Card className="p-4 bg-card/50 backdrop-blur-sm mb-4 inline-block">
+        <Card className="p-6 bg-background/95 backdrop-blur-xl border-2 border-border mb-4 inline-block shadow-xl">
           <div 
-            className="grid gap-0.5 select-none"
+            className="grid gap-1 select-none p-2 rounded-lg bg-muted/20"
             style={{ 
               gridTemplateColumns: `repeat(${config.cols}, minmax(0, 1fr))`,
               maxWidth: config.cols <= 8 ? '400px' : config.cols <= 12 ? '500px' : '600px'
@@ -322,16 +322,16 @@ export const Minesweeper = () => {
                   onContextMenu={(e) => toggleFlag(rowIndex, colIndex, e)}
                   disabled={isPaused}
                   className={`
-                    aspect-square flex items-center justify-center
-                    transition-all border border-border/30
+                    aspect-square flex items-center justify-center rounded
+                    transition-all border-2 font-semibold
                     ${config.cols <= 8 ? 'w-12 h-12' : config.cols <= 12 ? 'w-10 h-10' : 'w-8 h-8'}
                     ${cell.isRevealed
                       ? cell.isMine
-                        ? 'bg-destructive/30 text-destructive'
-                        : 'bg-muted/30'
-                      : 'bg-card hover:bg-muted/50 active:scale-95 cursor-pointer'
+                        ? 'bg-destructive/40 text-destructive border-destructive/50 shadow-inner'
+                        : 'bg-background border-border/50 shadow-inner'
+                      : 'bg-gradient-to-br from-card to-card/80 border-border hover:from-primary/20 hover:to-accent/20 hover:border-primary/50 active:scale-95 cursor-pointer shadow-md hover:shadow-lg'
                     }
-                    ${cell.isFlagged && !cell.isRevealed ? 'bg-accent/20' : ''}
+                    ${cell.isFlagged && !cell.isRevealed ? 'bg-accent/30 border-accent' : ''}
                   `}
                 >
                   {getCellContent(cell)}
