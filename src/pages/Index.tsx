@@ -8,6 +8,7 @@ import { Sudoku } from "@/components/games/Sudoku";
 import { WordSearch } from "@/components/games/WordSearch";
 import { SimonSays } from "@/components/games/SimonSays";
 import { Minesweeper } from "@/components/games/Minesweeper";
+import { Snake } from "@/components/games/Snake";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Gamepad2 } from "lucide-react";
 import { UserProfile } from "@/components/UserProfile";
@@ -22,7 +23,8 @@ export type GameType =
   | "sudoku" 
   | "word-search" 
   | "simon-says"
-  | "minesweeper";
+  | "minesweeper"
+  | "snake";
 
 const Index = () => {
   const [currentGame, setCurrentGame] = useState<GameType>("home");
@@ -45,6 +47,8 @@ const Index = () => {
         return <SimonSays />;
       case "minesweeper":
         return <Minesweeper />;
+      case "snake":
+        return <Snake />;
       default:
         return <GameGrid onGameSelect={setCurrentGame} />;
     }
