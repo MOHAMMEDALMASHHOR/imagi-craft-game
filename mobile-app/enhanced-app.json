@@ -1,0 +1,103 @@
+{
+  "expo": {
+    "name": "Imagi Craft - Premium Puzzle Games",
+    "slug": "imagi-craft-puzzles",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#6366F1",
+      "imageWidth": 300,
+      "imageHeight": 300
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.imagicraft.puzzles.premium",
+      "buildNumber": "2.0.0",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs camera access to create photo puzzles from your pictures.",
+        "NSPhotoLibraryUsageDescription": "This app needs photo library access to select images for puzzles.",
+        "NSMicrophoneUsageDescription": "This app uses microphone for haptic feedback simulation."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#6366F1"
+      },
+      "package": "com.imagicraft.puzzles.premium",
+      "versionCode": 2000000,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "VIBRATE",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ],
+      "config": {
+        "googleServicesFile": "./google-services.json"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "web"
+    },
+    "plugins": [
+      "expo-camera",
+      "expo-haptics",
+      "expo-notifications",
+      "expo-av",
+      "expo-sqlite",
+      "expo-font",
+      "expo-linear-gradient",
+      "expo-image-picker",
+      "expo-in-app-purchases"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "enableBaseline": false,
+      "enhancedAccessibilityAPI": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      },
+      "analytics": {
+        "enabled": true,
+        "provider": "firebase"
+      },
+      "cloudSave": {
+        "enabled": true,
+        "provider": "firebase"
+      },
+      "multiplayer": {
+        "enabled": true,
+        "maxPlayers": 4
+      }
+    },
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#6366F1",
+      "iosDisplayInForeground": true,
+      "androidMode": "default",
+      "androidCollapsedTitle": "Imagi Craft Puzzles"
+    },
+    "updates": {
+      "enabled": true,
+      "fallbackToCacheTimeout": 0,
+      "checkAutomatically": "ON_LOAD",
+      "url": "https://u.expo.dev/your-project-id"
+    },
+    "runtimeVersion": {
+      "policy": "nativeVersion"
+    }
+  }
+}
