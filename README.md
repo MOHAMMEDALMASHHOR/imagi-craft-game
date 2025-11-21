@@ -71,3 +71,18 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+
+
+
+
+# Run these commands in your terminal (outside current project)
+npx create-expo-app imagi-craft-mobile --template navigation-typescript
+cd imagi-craft-mobile
+npm install expo-camera expo-av @react-native-async-storage/async-storage expo-notifications react-native-svg expo-linear-gradient
+
+# Start development server
+npm start
+
+# Run on Android device/emulator
+npm run android
