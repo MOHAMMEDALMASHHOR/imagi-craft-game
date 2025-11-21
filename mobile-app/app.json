@@ -26,23 +26,25 @@
       "package": "com.imagicraft.puzzles",
       "versionCode": 1,
       "permissions": [
-        "CAMERA",
+        "VIBRATE",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
-      ]
+      ],
+      "compileSdkVersion": 33,
+      "targetSdkVersion": 33
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
     "plugins": [
-      "expo-camera",
       "expo-haptics",
-      "expo-notifications",
       "expo-av"
     ],
-    "experiments": {
-      "typedRoutes": true
+    "extra": {
+      "eas": {
+        "projectId": "imagi-craft-puzzles"
+      }
     }
   }
 }
