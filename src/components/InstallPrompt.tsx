@@ -18,12 +18,17 @@ export function InstallPrompt() {
 
   useEffect(() => {
     // Check if already installed (standalone mode)
+    // Check for iOS Safari standalone mode
+    const isIOSStandalone = 'standalone' in window.navigator && 
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
     const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches
-      || (window.navigator as any).standalone === true;
+      || isIOSStandalone;
     setIsStandalone(isInStandaloneMode);
 
-    // Check if iOS
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    // Check if iOS using feature detection and user agent as fallback
+    // We need UA detection here as there's no reliable feature detection for iOS vs Android
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+      !('MSStream' in window);
     setIsIOS(isIOSDevice);
 
     // Check if user has dismissed the prompt before

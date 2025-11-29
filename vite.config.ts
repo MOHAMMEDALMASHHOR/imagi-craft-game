@@ -88,15 +88,6 @@ export default defineConfig(({ mode }) => ({
             type: 'image/png',
             purpose: 'maskable'
           }
-        ],
-        screenshots: [
-          {
-            src: '/icons/icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            form_factor: 'narrow',
-            label: 'Brain Games Home Screen'
-          }
         ]
       },
       workbox: {

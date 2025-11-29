@@ -85,9 +85,13 @@ export function useIsStandalone() {
   React.useEffect(() => {
     // Check if app is running in standalone mode (installed as PWA)
     const checkStandalone = () => {
+      // Check for iOS Safari standalone mode
+      const isIOSStandalone = 'standalone' in window.navigator && 
+        (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+      
       const isInStandaloneMode = 
         window.matchMedia('(display-mode: standalone)').matches ||
-        (window.navigator as any).standalone === true ||
+        isIOSStandalone ||
         document.referrer.includes('android-app://');
       setIsStandalone(isInStandaloneMode);
     };
