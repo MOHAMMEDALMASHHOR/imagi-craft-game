@@ -78,3 +78,49 @@ export function useIsMobileDevice() {
 
   return isMobile && isTouchDevice;
 }
+
+export function useIsStandalone() {
+  const [isStandalone, setIsStandalone] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    // Check if app is running in standalone mode (installed as PWA)
+    const checkStandalone = () => {
+      const isInStandaloneMode = 
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true ||
+        document.referrer.includes('android-app://');
+      setIsStandalone(isInStandaloneMode);
+    };
+
+    checkStandalone();
+
+    // Also listen for display mode changes
+    const mql = window.matchMedia('(display-mode: standalone)');
+    mql.addEventListener('change', checkStandalone);
+
+    return () => mql.removeEventListener('change', checkStandalone);
+  }, []);
+
+  return isStandalone;
+}
+
+export function useNetworkStatus() {
+  const [isOnline, setIsOnline] = React.useState<boolean>(
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
+
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return isOnline;
+}
