@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import BottomNavigation from "@/components/ui/bottom-navigation";
+import InstallPrompt from "@/components/InstallPrompt";
+import OfflineIndicator from "@/components/OfflineIndicator";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import DailyChallenges from "./pages/DailyChallenges";
@@ -59,6 +61,7 @@ const AppContent = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <OfflineIndicator />
       <div className={`${isMobile ? 'pb-17' : ''}`}>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -72,14 +75,17 @@ const AppContent = () => {
       </div>
 
       {isMobile && (
-        <BottomNavigation
-          activeItem={currentPath === '/' ? 'home' : 'games'}
-          onNavigate={(path) => {
-            if (path.startsWith('/')) {
-              window.location.href = path;
-            }
-          }}
-        />
+        <>
+          <BottomNavigation
+            activeItem={currentPath === '/' ? 'home' : 'games'}
+            onNavigate={(path) => {
+              if (path.startsWith('/')) {
+                window.location.href = path;
+              }
+            }}
+          />
+          <InstallPrompt />
+        </>
       )}
     </div>
   );
