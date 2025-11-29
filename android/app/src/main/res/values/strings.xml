@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Puzzle Game</string>
+    <string name="title_activity_main">Puzzle Game</string>
+    <string name="package_name">com.imagicraft.puzzlegame</string>
+    <string name="custom_url_scheme">com.imagicraft.puzzlegame</string>
+</resources>
