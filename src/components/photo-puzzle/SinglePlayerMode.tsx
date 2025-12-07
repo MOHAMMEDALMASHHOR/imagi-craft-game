@@ -1,13 +1,15 @@
 import { useState, useRef } from "react";
-import { Camera, Upload, BarChart3 } from "lucide-react";
+import { Camera, Upload, BarChart3, Grid3X3, Puzzle } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { toast } from "sonner";
 import { DifficultySelector } from "./DifficultySelector";
 import { PuzzleGame } from "./PuzzleGame";
+import { JigsawPuzzleGame } from "./JigsawPuzzleGame";
 import { StatsModal } from "./StatsModal";
 
 type Difficulty = "easy" | "medium" | "hard" | "expert";
+type PuzzleType = "classic" | "jigsaw";
 
 interface SinglePlayerModeProps {
   onBack: () => void;
@@ -16,6 +18,7 @@ interface SinglePlayerModeProps {
 export const SinglePlayerMode = ({ onBack }: SinglePlayerModeProps) => {
   const [image, setImage] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const [puzzleType, setPuzzleType] = useState<PuzzleType>("jigsaw");
   const [gameStarted, setGameStarted] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -41,6 +44,15 @@ export const SinglePlayerMode = ({ onBack }: SinglePlayerModeProps) => {
   };
 
   if (gameStarted && image) {
+    if (puzzleType === "jigsaw") {
+      return (
+        <JigsawPuzzleGame
+          image={image}
+          difficulty={difficulty}
+          onBack={() => setGameStarted(false)}
+        />
+      );
+    }
     return (
       <PuzzleGame
         image={image}
@@ -53,9 +65,19 @@ export const SinglePlayerMode = ({ onBack }: SinglePlayerModeProps) => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex justify-between items-center mb-8 animate-fade-in">
-        <div className="text-center flex-1">
-          <h2 className="text-3xl font-bold mb-2 text-foreground">Single Player Mode</h2>
-          <p className="text-muted-foreground">Capture or upload a photo to begin</p>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={onBack}
+            variant="ghost"
+            size="sm"
+            className="text-foreground min-h-[44px]"
+          >
+            ← Back
+          </Button>
+          <div className="text-left">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-1 text-foreground">Single Player</h2>
+            <p className="text-muted-foreground text-sm">Capture or upload a photo to begin</p>
+          </div>
         </div>
         <Button
           onClick={() => setShowStats(true)}
@@ -108,6 +130,33 @@ export const SinglePlayerMode = ({ onBack }: SinglePlayerModeProps) => {
               />
             </div>
           )}
+        </Card>
+
+        {/* Puzzle Type Selection */}
+        <Card className="p-6 bg-card/50 backdrop-blur-sm">
+          <h3 className="text-lg font-semibold mb-4 text-foreground">Puzzle Type</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              onClick={() => setPuzzleType("jigsaw")}
+              variant={puzzleType === "jigsaw" ? "default" : "outline"}
+              size="lg"
+              className="h-20 flex flex-col gap-1"
+            >
+              <Puzzle className="h-6 w-6" />
+              <span>Jigsaw</span>
+              <span className="text-xs opacity-70">Pick & Place or Swap</span>
+            </Button>
+            <Button
+              onClick={() => setPuzzleType("classic")}
+              variant={puzzleType === "classic" ? "default" : "outline"}
+              size="lg"
+              className="h-20 flex flex-col gap-1"
+            >
+              <Grid3X3 className="h-6 w-6" />
+              <span>Classic</span>
+              <span className="text-xs opacity-70">Swap pieces</span>
+            </Button>
+          </div>
         </Card>
 
         {/* Difficulty Selection */}

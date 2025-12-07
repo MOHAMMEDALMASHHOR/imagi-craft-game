@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-import { Shuffle, Trophy, Eye, Lightbulb, Undo } from "lucide-react";
+import { Shuffle, Trophy, Eye, Undo } from "lucide-react";
 import confetti from "canvas-confetti";
 import { useIsMobileDevice } from "@/hooks/use-mobile";
 import { usePuzzleRecords } from "@/hooks/use-puzzle-records";
@@ -42,16 +42,10 @@ const getGridSize = (difficulty: Difficulty) => {
   }
 };
 
-export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
-  const isMobileDevice = useIsMobileDevice();
+// Desktop version of the puzzle game
+const DesktopPuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
   const [showPreview, setShowPreview] = useState(false);
   const { stats, saveRecord } = usePuzzleRecords();
-
-  // If mobile device, use the mobile-optimized component
-  if (isMobileDevice) {
-    return <MobilePuzzleGame image={image} difficulty={difficulty} onBack={onBack} />;
-  }
-
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [selectedPiece, setSelectedPiece] = useState<number | null>(null);
   const [moves, setMoves] = useState(0);
@@ -63,6 +57,7 @@ export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
 
   useEffect(() => {
     initializePuzzle();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initializePuzzle = () => {
@@ -251,4 +246,16 @@ export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
       <PreviewModal image={image} isOpen={showPreview} onClose={() => setShowPreview(false)} />
     </div>
   );
+};
+
+// Main PuzzleGame component that routes to mobile or desktop version
+export const PuzzleGame = ({ image, difficulty, onBack }: PuzzleGameProps) => {
+  const isMobileDevice = useIsMobileDevice();
+
+  // Route to appropriate component based on device
+  if (isMobileDevice) {
+    return <MobilePuzzleGame image={image} difficulty={difficulty} onBack={onBack} />;
+  }
+
+  return <DesktopPuzzleGame image={image} difficulty={difficulty} onBack={onBack} />;
 };
