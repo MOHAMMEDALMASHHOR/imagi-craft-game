@@ -11,10 +11,14 @@ import { cn } from "@/lib/utils";
 type Difficulty = "easy" | "medium" | "hard" | "expert";
 type GameMode = "swap" | "pick-place";
 
+// Constants for special index values
+const TRAY_INDEX = -1; // Piece is in the tray (not placed on board)
+const NO_PIECE_ID = -1; // No piece exists (for move history)
+
 interface JigsawPiece {
   id: number;
   correctIndex: number;
-  currentIndex: number; // -1 means in the piece tray
+  currentIndex: number; // TRAY_INDEX means in the piece tray
   image: string;
   edges: {
     top: "flat" | "tab" | "blank";
@@ -89,7 +93,7 @@ export const JigsawPuzzleGame = ({ image, difficulty, onBack }: JigsawPuzzleGame
       newPieces.push({
         id: i,
         correctIndex: i,
-        currentIndex: gameMode === "pick-place" ? -1 : i, // -1 for tray in pick-place mode
+        currentIndex: gameMode === "pick-place" ? TRAY_INDEX : i,
         image: image,
         edges: generateEdges(i, gridSize.rows, gridSize.cols),
       });
@@ -215,7 +219,7 @@ export const JigsawPuzzleGame = ({ image, difficulty, onBack }: JigsawPuzzleGame
           if (existingPiece) {
             const existing = newPieces.find(p => p.id === existingPiece.id);
             if (existing) {
-              existing.currentIndex = -1;
+              existing.currentIndex = TRAY_INDEX;
             }
           }
           
@@ -224,7 +228,7 @@ export const JigsawPuzzleGame = ({ image, difficulty, onBack }: JigsawPuzzleGame
           setMoveHistory([...moveHistory, { 
             piece1Id: piece.id, 
             piece1Index: oldIndex, 
-            piece2Id: existingPiece?.id ?? -1, 
+            piece2Id: existingPiece?.id ?? NO_PIECE_ID, 
             piece2Index: slotIndex 
           }]);
           
@@ -277,7 +281,7 @@ export const JigsawPuzzleGame = ({ image, difficulty, onBack }: JigsawPuzzleGame
       piece1.currentIndex = lastMove.piece1Index;
     }
     
-    if (lastMove.piece2Id >= 0) {
+    if (lastMove.piece2Id !== NO_PIECE_ID) {
       const piece2 = newPieces.find(p => p.id === lastMove.piece2Id);
       if (piece2) {
         piece2.currentIndex = lastMove.piece2Index;
@@ -310,8 +314,8 @@ export const JigsawPuzzleGame = ({ image, difficulty, onBack }: JigsawPuzzleGame
     };
   };
 
-  const trayPieces = pieces.filter(p => p.currentIndex === -1);
-  const placedPieces = pieces.filter(p => p.currentIndex >= 0);
+  const trayPieces = pieces.filter(p => p.currentIndex === TRAY_INDEX);
+  const placedPieces = pieces.filter(p => p.currentIndex !== TRAY_INDEX);
 
   return (
     <div className="container mx-auto px-4 py-4 max-w-4xl" ref={containerRef}>
