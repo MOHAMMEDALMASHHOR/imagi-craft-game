@@ -129,7 +129,7 @@ export const MobilePuzzleGame = ({ image, difficulty, onBack }: MobilePuzzleGame
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-20 safe-area-inset-bottom">
+    <div className="min-h-screen bg-background flex flex-col safe-area-inset-bottom">
       {/* Header with controls */}
       <div className="bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3 sticky top-0 z-40">
         <div className="flex items-center justify-between mb-2">
@@ -138,61 +138,61 @@ export const MobilePuzzleGame = ({ image, difficulty, onBack }: MobilePuzzleGame
               onClick={onBack}
               variant="ghost"
               size="sm"
-              className="text-foreground min-h-[44px] min-w-[44px]"
+              className="text-foreground min-h-[44px] min-w-[44px] -ml-2"
             >
               ← Back
             </Button>
-            <h1 className="text-lg font-bold text-foreground">Puzzle</h1>
+            <h1 className="text-lg font-bold text-foreground">Swap Puzzle</h1>
           </div>
           <div className="flex items-center gap-1">
             <Button
               onClick={() => setShowPreview(true)}
-              variant="outline"
+              variant="ghost"
               size="sm"
               className="min-h-[44px] min-w-[44px]"
             >
-              <Eye className="h-4 w-4" />
+              <Eye className="h-5 w-5" />
             </Button>
             <Button
               onClick={showHint}
-              variant="outline"
+              variant="ghost"
               size="sm"
               className="min-h-[44px] min-w-[44px]"
               disabled={gameState.solved || gameState.showingHint}
             >
-              <Lightbulb className="h-4 w-4" />
+              <Lightbulb className="h-5 w-5" />
             </Button>
             <Button
               onClick={undoMove}
-              variant="outline"
+              variant="ghost"
               size="sm"
               className="min-h-[44px] min-w-[44px]"
               disabled={gameState.moveHistory.length === 0 || gameState.solved}
             >
-              <Undo className="h-4 w-4" />
+              <Undo className="h-5 w-5" />
             </Button>
             <Button
               onClick={togglePause}
-              variant="outline"
+              variant="ghost"
               size="sm"
               className="min-h-[44px] min-w-[44px]"
               disabled={gameState.solved}
             >
-              {gameState.isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+              {gameState.isPaused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
             </Button>
             <Button
               onClick={resetGame}
-              variant="outline"
+              variant="ghost"
               size="sm"
               className="min-h-[44px] min-w-[44px]"
             >
-              <RotateCcw className="h-4 w-4" />
+              <RotateCcw className="h-5 w-5" />
             </Button>
           </div>
         </div>
 
         {/* Stats bar */}
-        <div className="flex justify-between text-sm">
+        <div className="flex justify-between text-sm px-1">
           <div className="flex items-center gap-4">
             <span className="text-muted-foreground">
               Moves: <span className="font-bold text-foreground">{gameState.moves}</span>
@@ -201,12 +201,9 @@ export const MobilePuzzleGame = ({ image, difficulty, onBack }: MobilePuzzleGame
               Time: <span className="font-bold text-foreground">{formatTime(gameState.elapsedTime)}</span>
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">
-              {gameState.correctPiecesCount}/{pieceCount}
-            </span>
-            <span className="text-muted-foreground">
-              {gridSize.rows}×{gridSize.cols}
+          <div className="flex items-center gap-3">
+            <span className="text-success font-medium">
+              ✓ {gameState.correctPiecesCount}/{pieceCount}
             </span>
           </div>
         </div>
@@ -214,12 +211,14 @@ export const MobilePuzzleGame = ({ image, difficulty, onBack }: MobilePuzzleGame
 
       {/* Pause overlay */}
       {gameState.isPaused && (
-        <div className="absolute inset-0 bg-background/90 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="text-center">
-            <Pause className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-2xl font-bold mb-2 text-foreground">Game Paused</h2>
-            <p className="text-muted-foreground mb-6">Tap Resume to continue playing</p>
-            <Button onClick={resumeGame} size="lg" className="min-h-[48px] min-w-[120px]">
+        <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-center p-6">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+              <Pause className="h-10 w-10 text-muted-foreground" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2 text-foreground">Paused</h2>
+            <p className="text-muted-foreground mb-6">Tap to continue</p>
+            <Button onClick={resumeGame} size="lg" className="min-h-[52px] min-w-[140px] text-lg">
               Resume
             </Button>
           </div>
@@ -228,9 +227,9 @@ export const MobilePuzzleGame = ({ image, difficulty, onBack }: MobilePuzzleGame
 
       {/* Puzzle Grid */}
       <div className="flex-1 flex items-center justify-center px-4 py-6">
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-md">
           <div
-            className="grid gap-1 bg-card/50 p-3 rounded-xl backdrop-blur-sm mx-auto"
+            className="grid gap-[2px] bg-card/50 p-2 rounded-xl backdrop-blur-sm mx-auto shadow-lg"
             style={{
               gridTemplateColumns: `repeat(${gridSize.cols}, 1fr)`,
               aspectRatio: `${gridSize.cols} / ${gridSize.rows}`,
@@ -262,31 +261,21 @@ export const MobilePuzzleGame = ({ image, difficulty, onBack }: MobilePuzzleGame
 
       {/* Success celebration */}
       {gameState.solved && (
-        <div className="absolute bottom-20 left-4 right-4 z-30">
-          <div className="bg-gradient-to-r from-success to-success/70 text-white rounded-xl p-4 text-center shadow-lg animate-bounce-in">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Trophy className="h-6 w-6" />
-              <span className="font-bold text-lg">Puzzle Complete!</span>
+        <div className="fixed inset-0 bg-background/90 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="text-center animate-bounce-in bg-card p-6 rounded-2xl shadow-2xl border border-border max-w-sm w-full">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-success to-success/70 flex items-center justify-center">
+              <Trophy className="h-8 w-8 text-white" />
             </div>
-            <div className="text-sm opacity-90">
+            <h2 className="text-2xl font-bold text-foreground mb-2">Puzzle Complete!</h2>
+            <p className="text-muted-foreground mb-6">
               {gameState.moves} moves • {formatTime(gameState.elapsedTime)}
-            </div>
-            <div className="flex gap-2 mt-3">
-              <Button
-                onClick={resetGame}
-                variant="secondary"
-                size="sm"
-                className="min-h-[44px] min-w-[100px]"
-              >
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button onClick={resetGame} className="min-h-[48px] flex-1 bg-gradient-to-r from-primary to-primary-glow">
                 <Shuffle className="mr-2 h-4 w-4" />
                 New Game
               </Button>
-              <Button
-                onClick={onBack}
-                variant="outline"
-                size="sm"
-                className="min-h-[44px] min-w-[100px]"
-              >
+              <Button onClick={onBack} variant="outline" className="min-h-[48px]">
                 Done
               </Button>
             </div>
@@ -296,10 +285,10 @@ export const MobilePuzzleGame = ({ image, difficulty, onBack }: MobilePuzzleGame
 
       {/* Touch instructions for new users */}
       {gameState.moves === 0 && !gameState.solved && !gameState.isPaused && (
-        <div className="absolute top-24 left-4 right-4 z-20">
-          <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-center">
-            <p className="text-sm text-muted-foreground">
-              {isMobile ? "Tap or drag pieces to swap them" : "Click pieces to swap them"}
+        <div className="absolute top-28 left-4 right-4 z-20 pointer-events-none">
+          <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 text-center backdrop-blur-sm">
+            <p className="text-sm text-foreground font-medium">
+              Tap two pieces to swap them
             </p>
           </div>
         </div>
