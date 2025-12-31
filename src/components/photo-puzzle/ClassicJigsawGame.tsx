@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-import { Shuffle, Trophy, Eye, Undo, Check } from "lucide-react";
+import { Shuffle, Trophy, Eye, Undo, Check, ArrowLeft, RotateCcw } from "lucide-react";
 import confetti from "canvas-confetti";
 import { usePuzzleRecords } from "@/hooks/use-puzzle-records";
 import { PreviewModal } from "./PreviewModal";
@@ -12,7 +12,7 @@ type Difficulty = "easy" | "medium" | "hard" | "expert";
 interface Piece {
   id: number;
   correctIndex: number;
-  placedIndex: number | null; // null = in tray, number = placed on board
+  placedIndex: number | null;
   image: string;
 }
 
@@ -64,12 +64,11 @@ export const ClassicJigsawGame = ({ image, difficulty, onBack }: ClassicJigsawGa
       newPieces.push({
         id: i,
         correctIndex: i,
-        placedIndex: null, // All pieces start in the tray
+        placedIndex: null,
         image: image,
       });
     }
     
-    // Shuffle the pieces array for tray display order
     for (let i = newPieces.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [newPieces[i], newPieces[j]] = [newPieces[j], newPieces[i]];
@@ -84,7 +83,6 @@ export const ClassicJigsawGame = ({ image, difficulty, onBack }: ClassicJigsawGa
 
   const handleTrayPieceClick = (pieceId: number) => {
     if (solved) return;
-    
     soundManager.click();
     
     if (selectedPiece === pieceId) {
@@ -110,7 +108,6 @@ export const ClassicJigsawGame = ({ image, difficulty, onBack }: ClassicJigsawGa
         if (piece) {
           const previousIndex = piece.placedIndex;
           
-          // If there's a piece on the slot, swap them
           if (pieceOnSlot) {
             pieceOnSlot.placedIndex = previousIndex;
           }
@@ -122,17 +119,14 @@ export const ClassicJigsawGame = ({ image, difficulty, onBack }: ClassicJigsawGa
           setSelectedPiece(null);
           setMoveHistory([...moveHistory, { pieceId: selectedPiece, fromIndex: previousIndex, toIndex: slotIndex }]);
           
-          // Check if piece is correctly placed
           if (piece.placedIndex === piece.correctIndex) {
             soundManager.place();
           }
           
-          // Check if puzzle is solved
           checkSolved(newPieces);
         }
       }
     } else if (pieceOnSlot) {
-      // Select the piece on the board
       soundManager.click();
       setSelectedPiece(pieceOnSlot.id);
     }
@@ -142,14 +136,11 @@ export const ClassicJigsawGame = ({ image, difficulty, onBack }: ClassicJigsawGa
     if (solved) return;
     
     if (selectedPiece === pieceId) {
-      // Deselect or return to tray
       soundManager.click();
       setSelectedPiece(null);
     } else if (selectedPiece !== null) {
-      // Swap with selected piece
       handleBoardSlotClick(slotIndex);
     } else {
-      // Select this piece
       soundManager.click();
       setSelectedPiece(pieceId);
     }
@@ -183,7 +174,6 @@ export const ClassicJigsawGame = ({ image, difficulty, onBack }: ClassicJigsawGa
     const piece = newPieces.find(p => p.id === lastMove.pieceId);
     
     if (piece) {
-      // Check if another piece was displaced
       const displacedPiece = newPieces.find(p => p.id !== lastMove.pieceId && p.placedIndex === lastMove.fromIndex);
       if (displacedPiece) {
         displacedPiece.placedIndex = lastMove.toIndex;
@@ -214,59 +204,72 @@ export const ClassicJigsawGame = ({ image, difficulty, onBack }: ClassicJigsawGa
   const correctPiecesCount = pieces.filter(p => p.placedIndex === p.correctIndex).length;
 
   return (
-    <div className="container mx-auto px-4 py-4 max-w-4xl flex flex-col h-[calc(100vh-80px)]">
+    <div className="min-h-screen bg-background flex flex-col safe-area-inset-bottom">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <Button variant="ghost" size="sm" onClick={onBack} className="mb-2">
-            ← Back
-          </Button>
-          <h2 className="text-xl font-bold text-foreground">Classic Jigsaw</h2>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <p>Moves: {moves}</p>
-            <p>Placed: {placedPiecesCount}/{pieceCount}</p>
-            <p className="text-success">Correct: {correctPiecesCount}</p>
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={onBack}
+              variant="ghost"
+              size="sm"
+              className="min-h-[44px] min-w-[44px] -ml-2"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-lg font-bold text-foreground">Classic Jigsaw</h1>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              onClick={() => setShowPreview(true)}
+              variant="ghost"
+              size="sm"
+              className="min-h-[44px] min-w-[44px]"
+            >
+              <Eye className="h-5 w-5" />
+            </Button>
+            <Button
+              onClick={undoMove}
+              variant="ghost"
+              size="sm"
+              className="min-h-[44px] min-w-[44px]"
+              disabled={moveHistory.length === 0 || solved}
+            >
+              <Undo className="h-5 w-5" />
+            </Button>
+            <Button
+              onClick={initializePuzzle}
+              variant="ghost"
+              size="sm"
+              className="min-h-[44px] min-w-[44px]"
+            >
+              <RotateCcw className="h-5 w-5" />
+            </Button>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => setShowPreview(true)}
-            variant="outline"
-            size="sm"
-          >
-            <Eye className="mr-2 h-4 w-4" />
-            Preview
-          </Button>
-          <Button
-            onClick={undoMove}
-            variant="outline"
-            size="sm"
-            disabled={moveHistory.length === 0 || solved}
-          >
-            <Undo className="mr-2 h-4 w-4" />
-            Undo
-          </Button>
-          <Button
-            onClick={initializePuzzle}
-            variant="secondary"
-            size="sm"
-          >
-            <Shuffle className="mr-2 h-4 w-4" />
-            Restart
-          </Button>
+
+        {/* Stats bar */}
+        <div className="flex justify-between items-center text-sm px-1">
+          <div className="flex items-center gap-4">
+            <span className="text-muted-foreground">
+              Moves: <span className="font-bold text-foreground">{moves}</span>
+            </span>
+            <span className="text-muted-foreground">
+              Placed: <span className="font-bold text-foreground">{placedPiecesCount}/{pieceCount}</span>
+            </span>
+          </div>
+          <span className="text-success font-medium">
+            ✓ {correctPiecesCount}
+          </span>
         </div>
       </div>
 
-      {/* Board Area - Top Half */}
-      <div className="flex-1 flex items-center justify-center mb-4 min-h-0">
+      {/* Board Area */}
+      <div className="flex-1 flex items-center justify-center px-4 py-4 min-h-0">
         <div 
-          className="relative bg-card/30 rounded-xl border-2 border-dashed border-border overflow-hidden"
+          className="relative bg-card/30 rounded-xl border-2 border-dashed border-border/50 overflow-hidden w-full max-w-[min(100%,70vh)]"
           style={{
             aspectRatio: `${gridSize.cols} / ${gridSize.rows}`,
-            maxHeight: '100%',
-            maxWidth: '100%',
-            width: 'auto',
-            height: '100%',
           }}
         >
           {/* Ghost image background */}
@@ -299,23 +302,23 @@ export const ClassicJigsawGame = ({ image, difficulty, onBack }: ClassicJigsawGa
                     : handleBoardSlotClick(slotIndex)
                   }
                   className={`
-                    relative border border-border/30 cursor-pointer transition-all
-                    ${!pieceOnSlot ? 'hover:bg-primary/10' : ''}
-                    ${selectedPiece !== null && !pieceOnSlot ? 'bg-primary/5 border-primary/50' : ''}
+                    relative border border-border/20 cursor-pointer transition-all
+                    ${!pieceOnSlot ? 'hover:bg-primary/10 active:bg-primary/20' : ''}
+                    ${selectedPiece !== null && !pieceOnSlot ? 'bg-primary/10 border-primary/40' : ''}
                   `}
                 >
                   {pieceOnSlot && (
                     <div
                       className={`
-                        absolute inset-1 rounded transition-all
-                        ${selectedPiece === pieceOnSlot.id ? 'ring-4 ring-primary shadow-lg shadow-primary/50 scale-95' : ''}
+                        absolute inset-[2px] rounded-sm transition-all
+                        ${selectedPiece === pieceOnSlot.id ? 'ring-3 ring-primary shadow-lg shadow-primary/50 scale-95' : ''}
                         ${isCorrect ? 'ring-2 ring-success/70' : ''}
                       `}
                       style={getPieceStyle(pieceOnSlot)}
                     >
                       {isCorrect && (
-                        <div className="absolute top-1 right-1 bg-success rounded-full p-0.5">
-                          <Check className="h-3 w-3 text-white" />
+                        <div className="absolute top-0.5 right-0.5 bg-success rounded-full p-0.5">
+                          <Check className="h-2.5 w-2.5 text-white" />
                         </div>
                       )}
                     </div>
@@ -327,20 +330,22 @@ export const ClassicJigsawGame = ({ image, difficulty, onBack }: ClassicJigsawGa
         </div>
       </div>
 
-      {/* Tray Area - Bottom */}
-      <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-3 h-[150px] flex-shrink-0">
-        <div className="text-xs text-muted-foreground mb-2 flex justify-between">
-          <span>Piece Tray ({trayPieces.length} remaining)</span>
-          <span className="text-muted-foreground/60">← Scroll to see more →</span>
+      {/* Tray Area */}
+      <div className="bg-card/80 backdrop-blur-sm border-t border-border px-4 py-3 pb-6">
+        <div className="text-xs text-muted-foreground mb-2 flex justify-between items-center">
+          <span className="font-medium">{trayPieces.length} pieces left</span>
+          {trayPieces.length > 0 && (
+            <span className="text-muted-foreground/60">Swipe →</span>
+          )}
         </div>
         <div 
           ref={trayRef}
-          className="flex gap-3 overflow-x-auto pb-2 h-[110px] items-center scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent"
-          style={{ scrollBehavior: 'smooth' }}
+          className="flex gap-2 overflow-x-auto pb-2 min-h-[72px] items-center snap-x snap-mandatory"
+          style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}
         >
           {trayPieces.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
-              {solved ? "🎉 All pieces placed correctly!" : "All pieces placed on the board"}
+            <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm py-4">
+              {solved ? "🎉 Puzzle complete!" : "All pieces on board"}
             </div>
           ) : (
             trayPieces.map((piece) => (
@@ -348,10 +353,10 @@ export const ClassicJigsawGame = ({ image, difficulty, onBack }: ClassicJigsawGa
                 key={piece.id}
                 onClick={() => handleTrayPieceClick(piece.id)}
                 className={`
-                  flex-shrink-0 w-20 h-20 rounded-lg cursor-pointer transition-all hover:scale-110
+                  flex-shrink-0 w-16 h-16 rounded-lg cursor-pointer transition-all snap-start
                   ${selectedPiece === piece.id 
-                    ? 'ring-4 ring-primary shadow-lg shadow-primary/50 scale-110' 
-                    : 'hover:ring-2 hover:ring-accent shadow-md'
+                    ? 'ring-3 ring-primary shadow-lg shadow-primary/50 scale-110' 
+                    : 'hover:ring-2 hover:ring-primary/50 active:scale-95 shadow-md'
                   }
                 `}
                 style={getPieceStyle(piece)}
@@ -363,20 +368,20 @@ export const ClassicJigsawGame = ({ image, difficulty, onBack }: ClassicJigsawGa
 
       {/* Success overlay */}
       {solved && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="text-center animate-bounce-in bg-card p-8 rounded-2xl shadow-2xl">
-            <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-success to-success/70 rounded-full text-white font-bold text-lg shadow-lg mb-4">
-              <Trophy className="h-6 w-6" />
-              Puzzle Complete!
+        <div className="fixed inset-0 bg-background/90 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="text-center animate-bounce-in bg-card p-6 rounded-2xl shadow-2xl border border-border max-w-sm w-full">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-success to-success/70 flex items-center justify-center">
+              <Trophy className="h-8 w-8 text-white" />
             </div>
-            <p className="text-muted-foreground mb-4">Solved in {moves} moves</p>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Puzzle Complete!</h2>
+            <p className="text-muted-foreground mb-6">Solved in {moves} moves</p>
             <div className="flex gap-3 justify-center">
-              <Button onClick={initializePuzzle} variant="default">
+              <Button onClick={initializePuzzle} className="min-h-[48px] flex-1 bg-gradient-to-r from-primary to-primary-glow">
                 <Shuffle className="mr-2 h-4 w-4" />
                 Play Again
               </Button>
-              <Button onClick={onBack} variant="outline">
-                Back to Menu
+              <Button onClick={onBack} variant="outline" className="min-h-[48px]">
+                Done
               </Button>
             </div>
           </div>
